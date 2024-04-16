@@ -1,118 +1,97 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React from 'react';
-import type {PropsWithChildren} from 'react';
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
+  ActivityIndicator,
+  FlatList,
+  Image,
   StyleSheet,
   Text,
-  useColorScheme,
+  TouchableOpacity,
   View,
 } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {NavigationContainer} from '@react-navigation/native';
+import {MyStack} from './navigation/StackNavigation/StackNavigator';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
-
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+const App = () => {
+  const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  useEffect(() => {
+    getProducts();
+  }, []);
+  const getProducts = () => {
+    const URl = 'https://fakestoreapi.com/products';
+    fetch(URl)
+      .then(res => {
+        if (!res.ok) {
+          throw new Error('something went wrong !');
+        }
+        return res.json();
+      })
+      .then(data => {
+        setProducts(data);
+        setIsLoading(false);
+        console.log(data);
+      })
+      .catch(error => {
+        setError(error.message);
+        console.log(error.message);
+      });
   };
-
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
+    // <NavigationContainer>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: 'white',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}>
+      {isLoading ? (
+        <ActivityIndicator color="black" size={'large'} />
+      ) : error ? (
+        <Text style={{fontSize: 20, color: 'red'}}>{error}</Text>
+      ) : (
+        <FlatList
+        showsVerticalScrollIndicator={false}
+          data={products}
+          renderItem={({item}) => (
+            <View
+              style={{
+                backgroundColor: 'white',
+                alignItems: 'center',
+                padding: 20,
+                margin: 20,
+                shadowColor: '#000',
+                shadowOffset: {
+                  width: 0,
+                  height: 9,
+                },
+                shadowOpacity: 0.5,
+                shadowRadius: 12.35,
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+                elevation: 19,
+              }}>
+              <Image
+                style={{width: 200, height: 200}}
+                source={{uri: item.image}}
+              />
+              <Text
+                style={{fontSize: 20, color: '#000000', textAlign: 'center'}}>
+                {item.title}
+              </Text>
+              <Text
+                style={{fontSize: 16, color: '#000000', textAlign: 'center'}}>
+                {item.price}
+              </Text>
+            </View>
+          )}
+        />
+      )}
+    </View>
+    // </NavigationContainer>
+  );
+};
 
 export default App;
+
+const styles = StyleSheet.create({});
